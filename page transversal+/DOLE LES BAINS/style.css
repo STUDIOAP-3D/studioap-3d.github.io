@@ -9598,3 +9598,181 @@ iframe {
   }
 
 }
+/* =========================================================
+   ADAPTATION SMARTPHONE / TABLETTE
+   ========================================================= */
+
+/* Base : éviter les débordements horizontaux */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* Les iframes occupent toujours la largeur disponible */
+iframe {
+  max-width: 100%;
+}
+
+/* =========================================================
+   SMARTPHONE : largeur <= 767px
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+  /* Conteneur principal */
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  /* Zone des boutons / contrôles */
+  .controls {
+    height: auto;
+    min-height: 60px;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .controls > * {
+    margin-right: 0;
+    margin-bottom: 0;
+  }
+
+  /* Boutons */
+  button {
+    width: auto;
+    min-width: 70px;
+    height: 40px;
+    margin-left: 0 !important;
+    padding: 0 10px;
+    font-size: 11px !important;
+  }
+
+  /* Texte des éléments de navigation */
+  span.caret {
+    font-size: 0.9rem !important;
+    margin-right: 5px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  span.caret_child {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  /* Liste de navigation */
+  #navTree {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+
+  li {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  ul.nested.active {
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Description flottante */
+  .description {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+    max-width: none;
+    padding: 15px;
+    font-size: 0.9rem;
+  }
+
+  /* Iframe */
+  #api-frame {
+    width: 100%;
+    height: 60vh;
+    max-width: 100%;
+  }
+
+  .iframe-container {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .iframe-container > iframe {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* =========================================================
+   TRÈS PETIT SMARTPHONE : largeur <= 480px
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .controls {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  button {
+    flex: 1 1 auto;
+    min-width: 65px;
+    height: 38px;
+    padding: 0 7px;
+    font-size: 10px !important;
+  }
+
+  span.caret {
+    font-size: 0.8rem !important;
+  }
+
+  li {
+    font-size: 0.75rem;
+    padding: 0.65rem 0.4rem;
+  }
+
+  #api-frame {
+    height: 55vh;
+  }
+
+  .description {
+    padding: 12px;
+    font-size: 0.85rem;
+  }
+}
+
+/* =========================================================
+   TABLETTE / PC
+   ========================================================= */
+
+@media (min-width: 768px) {
+
+  #navTree {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  #api-frame {
+    height: 80vh;
+  }
+
+}
