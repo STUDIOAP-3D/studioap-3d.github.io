@@ -1,102 +1,99 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!DOCTYPE HTML>
+<!--
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+	site créé par alban PERRET ( Studioap 3D) MOUHAHAHAHA et Marine HO !
+-->
+<html>
+	<head>
+		<title>STUDIOAP-3D</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page protégée</title>
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
 
-    <link rel="stylesheet" href="style.css">
+							
 
-    <!-- API Sketchfab -->
-    <script src="https://static.sketchfab.com/api/sketchfab-viewer-1.9.0.js"></script>
+							
 
-    <style>
-        #page-protegee {
-            display: none;
-        }
+						</div>
+					</header>
 
-        #acces-refuse {
-            display: none;
-            background-color: #272425;
-            color: white;
-            text-align: center;
-            min-height: 100vh;
-            padding-top: 100px;
-        }
-    </style>
-</head>
+				
 
-<body>
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<header>
+								<h1>LES TROIS MATS<br /></h1>
+								<p>Maquette numériques et photogrammétrique d'étude<br><i>Hervé RONNET</i></p>
+							</header>
+							<section class="tiles">
+								<article class="style1">
+									<span class="image">
+										<img src="images/3mâts.jpg" alt="" />
+									</span>
+									<a href="actuel/3MATSactuel.html">
+										<h2>PARKING ACTUEL 2026</h2>
+										<div class="content">
+											<p>Photogrmmétrie du site</p>
+										</div>
+									</a>
+								</article>
+								<article class="style2">
+									<span class="image">
+										<img src="images/3matsarchi.jpg" alt="" />
+									</span>
+									<a href="archi/3MATSarchi.html">
+										<h2>PARKING SILO PLANS ARCHI</h2>
+										<div class="content">
+											<p>Visualisation 3D du site</p>
+										</div>
+									</a>
+								</article>
+								<article class="style3">
+									<span class="image">
+										<img src="images/3matsprojet.jpg" alt="" />
+									</span>
+									<a href="projet/3MATSprojet.html">
+										<h2>PROJET HOTEL ****</h2>
+										<div class="content">
+											<p>Propositions d'aménagements</p>
+										</div>
+									</a>
+								</article>
+				
+							</section>
+						</div>
+					</div>
 
-    <!-- Message si mauvais mot de passe -->
-    <div id="acces-refuse">
-        <h1>⛔ Accès refusé</h1>
-        <p>Mot de passe incorrect.</p>
-    </div>
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							
+							<ul class="copyright">
+								<li>&copy; STUDIOAP-3D All rights reserved</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</footer>
 
-    <!-- PAGE PROTÉGÉE -->
-    <div id="page-protegee">
+			</div>
 
-        <div class="py-5 min-height-90vh"
-             style="min-height:90vh; background-color:#272425!important;">
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
 
-            <div class="container">
-
-                <div class="row">
-
-                    <div class="d-flex flex-column col-md-8 mb-3">
-
-                        <iframe
-                            id="api-frame"
-                            width="100%"
-                            height="auto"
-                            allowfullscreen
-                            mozallowfullscreen="true"
-                            webkitallowfullscreen="true"
-                            class="mb-3 rounded shadow-lg embed-responsive embed-responsive-4by3 border border-info"
-                            loading="lazy">
-                        </iframe>
-
-                    </div>
-
-                    <div class="d-flex flex-column col-md-4 mx-auto">
-
-                        <div class="navTree" id="navTree">
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <script>
-        const motDePasse = prompt("Mot de passe :");
-
-        if (motDePasse === "Transversal+") {
-
-            // Afficher la page
-            document.getElementById("page-protegee").style.display = "block";
-
-            // Charger sf_showhide.js APRÈS le mot de passe
-            const script = document.createElement("script");
-            script.src = "sf_showhide.js";
-
-            document.body.appendChild(script);
-
-        } else {
-
-            // Afficher le message d'erreur
-            document.getElementById("acces-refuse").style.display = "block";
-
-        }
-    </script>
-
-</body>
+	</body>
 </html>
