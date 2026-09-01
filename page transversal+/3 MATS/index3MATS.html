@@ -6,27 +6,44 @@
 	site créé par alban PERRET ( Studioap 3D) MOUHAHAHAHA et Marine HO !
 -->
 <html>
+
+    <style>
+        #page-protegee {
+            display: none;
+        }
+
+        #acces-refuse {
+            display: none;
+            background-color: #272425;
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            padding-top: 100px;
+        }
+    </style>
+
 	<head>
 		<title>STUDIOAP-3D</title>
-		<img src="images/LOGO transversal+.png" alt="">
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 	</head>
+
+
+
 	<body class="is-preload">
+
+		    <!-- Message si mauvais mot de passe -->
+    <div id="acces-refuse">
+        <h1>⛔ Accès refusé</h1>
+        <p>Mot de passe incorrect.</p>
+    </div>
+
 		<!-- Wrapper -->
+		 <div id="page-protegee">
 			<div id="wrapper">
 
-				<!-- Header -->
-					<header id="header">
-						<div class="inner">
-
-							
-
-							
-
-						</div>
 					</header>
 
 				
@@ -118,6 +135,28 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+
+									<script>
+        const motDePasse = prompt("Mot de passe :");
+
+        if (motDePasse === "Transversal+") {
+
+            // Afficher la page
+            document.getElementById("page-protegee").style.display = "block";
+
+            // Charger sf_showhide.js APRÈS le mot de passe
+            const script = document.createElement("script");
+            script.src = "sf_showhide.js";
+
+            document.body.appendChild(script);
+
+        } else {
+
+            // Afficher le message d'erreur
+            document.getElementById("acces-refuse").style.display = "block";
+
+        }
+    </script>
 
 	</body>
 </html>
