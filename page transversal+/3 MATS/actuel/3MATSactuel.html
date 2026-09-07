@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page protégée</title>
+    <title>Page</title>
 
     <link rel="stylesheet" href="style.css">
 
@@ -15,27 +15,12 @@
         #page-protegee {
             display: none;
         }
-
-        #acces-refuse {
-            display: none;
-            background-color: #272425;
-            color: white;
-            text-align: center;
-            min-height: 100vh;
-            padding-top: 100px;
-        }
     </style>
 </head>
 
 <body>
 
-    <!-- Message si mauvais mot de passe -->
-    <div id="acces-refuse">
-        <h1>⛔ Accès refusé</h1>
-        <p>Mot de passe incorrect.</p>
-    </div>
-
-    <!-- PAGE PROTÉGÉE -->
+    <!-- PAGE -->
     <div id="page-protegee">
 
         <div class="py-5 min-height-90vh"
@@ -75,27 +60,14 @@
 
     </div>
 
-
     <script>
-        const motDePasse = prompt("Mot de passe :");
+        // Afficher directement la page
+        document.getElementById("page-protegee").style.display = "block";
 
-        if (motDePasse === "Transversal+") {
-
-            // Afficher la page
-            document.getElementById("page-protegee").style.display = "block";
-
-            // Charger sf_showhide.js APRÈS le mot de passe
-            const script = document.createElement("script");
-            script.src = "sf_showhide.js";
-
-            document.body.appendChild(script);
-
-        } else {
-
-            // Afficher le message d'erreur
-            document.getElementById("acces-refuse").style.display = "block";
-
-        }
+        // Charger sf_showhide.js
+        const script = document.createElement("script");
+        script.src = "sf_showhide.js";
+        document.body.appendChild(script);
     </script>
 
 </body>
