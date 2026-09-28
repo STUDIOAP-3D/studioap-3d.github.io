@@ -388,25 +388,79 @@
             flex: 1 1 auto;
             min-height: 0;
             overflow-y: auto;
-            padding: 22px 22px 6px;
-            background: var(--surface);
-            border: 1px solid var(--line);
+            padding: 14px 14px 8px;
+            background: #ffffff;
+            border: 1px solid #d9dee4;
             border-radius: var(--radius);
-            box-shadow: 0 1px 2px rgba(15, 27, 38, .04);
+            box-shadow: 0 1px 3px rgba(15, 27, 38, .10);
+            color: #111820;
+            scrollbar-color: #b8c0c8 #ffffff;
         }
         .comments-title {
-            margin: 0 0 14px;
-            font-size: 18px;
+            margin: 0 0 10px;
+            font-size: 16px;
             font-weight: 700;
+            letter-spacing: .01em;
+            color: #014796;
         }
         .comments-body p {
-            margin: 0 0 14px;
-            font-size: 13.5px;
-            line-height: 1.65;
-            color: var(--ink-soft);
+            margin: 0 0 8px;
+            padding: 0 0 8px 11px;
+            border-bottom: 1px solid #dfe3e7;
+            font-size: 12px;
+            line-height: 1.34;
+            color: #202830;
         }
-        .comments-body p:last-child { margin-bottom: 16px; }
+        .comments-body p:last-child { margin-bottom: 0; }
         .comments-body p.is-placeholder { font-style: italic; }
+        .comments-body .comment-section {
+            position: relative;
+        }
+        .comments-body .comment-section::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 1px;
+            bottom: 8px;
+            width: 3px;
+            border-radius: 0 2px 2px 0;
+            background: var(--navy);
+        }
+        .comments-body .comment-kicker {
+            display: block;
+            margin-bottom: 3px;
+            color: #0155b4;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .02em;
+        }
+        .comments-body .force-title {
+            display: block;
+            margin: 9px 0 6px;
+            padding-left: 0;
+            border: 0;
+            color: #00428d;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .02em;
+        }
+        .comments-body .line-force {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid #d9dee4;
+            border-bottom: 1px solid #d9dee4;
+        }
+        .comments-body .line-force span {
+            min-width: 0;
+            padding: 6px 4px;
+            text-align: center;
+            font-size: 8.5px;
+            line-height: 1.18;
+            font-weight: 700;
+            color: #034fa5;
+            border-right: 1px solid #d9dee4;
+        }
+        .comments-body .line-force span:last-child { border-right: 0; }
 
         .photo-card {
             flex: 0 0 auto;
@@ -619,7 +673,7 @@
         /* Bloc central du bandeau */
         headline: {
             title:    "Explorer les périmètres d’intervention",
-            subtitle: "Une maquette interactive pour comprendre, concevoir et dialoguer"
+            subtitle: "Une maquette interactive pour comprendre, analyser et dialoguer"
         },
 
         /* Logo partenaire affiché dans le bandeau (laisser logoSrc: "" pour le masquer) */
@@ -656,7 +710,7 @@
         emptyMessage: "Aucun modèle 3D n’est renseigné pour cette thématique.",
 
         /* Panneau latéral (modifiable pour chaque thématique ci-dessous) */
-        commentsTitle:       "Commentaires :",
+        commentsTitle:       "LECTURE AMO :",
         commentsPlaceholder: "Aucun commentaire pour cette thématique.",
         photoEmptyMessage:   "Aucune photo renseignée.",
 
@@ -681,8 +735,14 @@
                 model:    "58b04cbcd9da44af8d1fb39555d8033b",
                 note:     "Ce qui est aujourd’hui clairement identifié dans l’AOT",
                 comments: [
-                    "On ajoutera ici le texte de commentaire pour cette thématique.",
-                    "On pourra ajouter autant de paragraphes que nécessaire."
+                    { html: '<span class="comment-kicker">PHYSIQUEMENT</span>Un ouvrage unique, conçu sur trois niveaux pour une seule fonction : le stationnement. Près de 100 m de longueur × 40 m de profondeur, pour une toiture-terrasse située à seulement ≈ 5,40 m au-dessus du Niveau 0.' },
+                    { html: '<span class="comment-kicker">JURIDIQUEMENT</span>Une attribution doublement limitée : dans l’espace, au Niveau 1 et à la toiture-terrasse, tandis que le Niveau 0 reste affecté au stationnement ; dans le temps, par une AOT d’une durée de 35 ans. Cette durée doit être mise en regard des investissements nécessaires à la transformation de l’ouvrage et de leur amortissement.' },
+                    { html: '<span class="comment-kicker">RÉGLEMENTAIREMENT</span>La toiture-terrasse doit devenir un véritable espace de vie et d’activité. Les volumes construits ou couverts nécessaires à son fonctionnement conduisent à examiner avec la Ville l’adaptation du cadre d’urbanisme.' },
+                    { html: '<span class="comment-kicker">OPÉRATIONNELLEMENT</span>Le Niveau 0 reste un parking public, mais devient aussi le socle d’accès aux nouvelles activités. La capacité de stationnement réellement mobilisable par CQFD constitue une donnée majeure de leur faisabilité et de leur attractivité.' },
+                    { html: '<span class="comment-kicker">TECHNIQUEMENT</span>Deux usages différents vont désormais coexister dans un même ouvrage. Rampes, ventilation et gaz d’échappement, eaux, réseaux, sécurité, circulations et maintenance devront être séparés, adaptés ou organisés.' },
+                    { html: '<span class="comment-kicker">FONCIÈREMENT</span>Le projet ne peut être pensé « hors sol ». Il doit s’ancrer dans son terrain et ses abords. La bande située au droit de la façade maritime constitue à ce titre une interface majeure à examiner.' },
+                    { html: '<span class="comment-kicker">ARCHITECTURALEMENT</span>Le changement d’usage ne suffira pas à effacer l’image du parking silo. L’enjeu est de retrouver une échelle, une adresse et une identité capables de métamorphoser l’ouvrage et de donner envie de s’arrêter, d’entrer et de découvrir les activités des « Trois Mâts ».' },
+                    { html: '<span class="comment-kicker force-title">LIGNE DE FORCE</span><div class="line-force"><span>UN OUVRAGE<br>UNIQUE</span><span>UNE ATTRIBUTION<br>PARTIELLE</span><span>DES CONDITIONS<br>DE FAISABILITÉ<br>À SÉCURISER</span><span>UNE MÉTAMORPHOSE<br>À INVENTER</span></div>' }
                 ],
                 photo: "plan parking top.jpg"
             },
@@ -734,7 +794,7 @@
                 photo: ""
             },
             {
-                title:    "Foncier périphérique",
+                title:    "Foncier",
                 subtitle: "",                      /* vide = pas de 2e ligne */
                 color:    "#dd2a7b",
                 model:    "ID_MODELE_7",
@@ -930,8 +990,13 @@
         const body = $("#commentsBody");
         body.innerHTML = "";
         const paragraphs = (theme.comments && theme.comments.length) ? theme.comments : [CONFIG.commentsPlaceholder];
-        paragraphs.forEach(function (text, k) {
-            const p = make("p", null, text);
+        paragraphs.forEach(function (item) {
+            const p = make("p");
+            if (item && typeof item === "object" && item.html) {
+                p.innerHTML = item.html;
+            } else {
+                p.textContent = item;
+            }
             if (!theme.comments || !theme.comments.length) p.className = "is-placeholder";
             body.append(p);
         });
