@@ -403,7 +403,8 @@
             letter-spacing: .01em;
             color: #014796;
         }
-        .comments-body p {
+        .comments-body p,
+        .comments-body > div.comment-section {
             margin: 0 0 8px;
             padding: 0 0 8px 11px;
             border-bottom: 1px solid #dfe3e7;
@@ -411,11 +412,28 @@
             line-height: 1.34;
             color: #202830;
         }
-        .comments-body p:last-child { margin-bottom: 0; }
+        .comments-body p:last-child,
+        .comments-body > div.comment-section:last-child { margin-bottom: 0; }
         .comments-body p.is-placeholder { font-style: italic; }
         .comments-body .comment-section {
             position: relative;
         }
+        .comments-body .comment-section p {
+            margin: 0 0 8px;
+            padding: 0;
+            border: 0;
+        }
+        .comments-body .comment-section p:last-child { margin-bottom: 0; }
+        .comments-body .comment-section ul {
+            margin: 6px 0 0;
+            padding-left: 14px;
+        }
+        .comments-body .comment-section li {
+            margin-bottom: 4px;
+            padding: 0;
+            border: 0;
+        }
+        .comments-body .comment-section li:last-child { margin-bottom: 0; }
         .comments-body .comment-section::before {
             content: "";
             position: absolute;
@@ -735,14 +753,14 @@
                 model:    "58b04cbcd9da44af8d1fb39555d8033b",
                 note:     "Ce qui est aujourd’hui clairement identifié dans l’AOT",
                 comments: [
-                    { html: '<span class="comment-kicker">PHYSIQUEMENT</span>Un ouvrage unique, conçu sur trois niveaux pour une seule fonction : le stationnement. Près de 100 m de longueur × 40 m de profondeur, pour une toiture-terrasse située à seulement ≈ 5,40 m au-dessus du Niveau 0.' },
-                    { html: '<span class="comment-kicker">JURIDIQUEMENT</span>Une attribution doublement limitée : dans l’espace, au Niveau 1 et à la toiture-terrasse, tandis que le Niveau 0 reste affecté au stationnement ; dans le temps, par une AOT d’une durée de 35 ans. Cette durée doit être mise en regard des investissements nécessaires à la transformation de l’ouvrage et de leur amortissement.' },
-                    { html: '<span class="comment-kicker">RÉGLEMENTAIREMENT</span>La toiture-terrasse doit devenir un véritable espace de vie et d’activité. Les volumes construits ou couverts nécessaires à son fonctionnement conduisent à examiner avec la Ville l’adaptation du cadre d’urbanisme.' },
-                    { html: '<span class="comment-kicker">OPÉRATIONNELLEMENT</span>Le Niveau 0 reste un parking public, mais devient aussi le socle d’accès aux nouvelles activités. La capacité de stationnement réellement mobilisable par CQFD constitue une donnée majeure de leur faisabilité et de leur attractivité.' },
-                    { html: '<span class="comment-kicker">TECHNIQUEMENT</span>Deux usages différents vont désormais coexister dans un même ouvrage. Rampes, ventilation et gaz d’échappement, eaux, réseaux, sécurité, circulations et maintenance devront être séparés, adaptés ou organisés.' },
-                    { html: '<span class="comment-kicker">FONCIÈREMENT</span>Le projet ne peut être pensé « hors sol ». Il doit s’ancrer dans son terrain et ses abords. La bande située au droit de la façade maritime constitue à ce titre une interface majeure à examiner.' },
-                    { html: '<span class="comment-kicker">ARCHITECTURALEMENT</span>Le changement d’usage ne suffira pas à effacer l’image du parking silo. L’enjeu est de retrouver une échelle, une adresse et une identité capables de métamorphoser l’ouvrage et de donner envie de s’arrêter, d’entrer et de découvrir les activités des « Trois Mâts ».' },
-                    { html: '<span class="comment-kicker force-title">LIGNE DE FORCE</span><div class="line-force"><span>UN OUVRAGE<br>UNIQUE</span><span>UNE ATTRIBUTION<br>PARTIELLE</span><span>DES CONDITIONS<br>DE FAISABILITÉ<br>À SÉCURISER</span><span>UNE MÉTAMORPHOSE<br>À INVENTER</span></div>' }
+                    { tag: "div", html: '<span class="comment-kicker">MORPHOLOGIE ACTUELLE</span><p>L’ouvrage actuel est conçu sur <strong>deux niveaux, complétés par une toiture-terrasse</strong>, pour une seule fonction — le stationnement — répartie sur ces trois niveaux.</p><p><strong>Près de 100 m de longueur × 40 m de profondeur</strong>, pour une toiture-terrasse située à <strong>≈ 5,40 m au-dessus du Niveau 0</strong>.</p><p>Côté place du marché, <strong>un appendice regroupe les locaux liés à la gestion du parking et les deux ascenseurs assurant les circulations verticales des usagers</strong>. Principal point de liaison piétonne entre les niveaux de stationnement et le Niveau 0, il apparaît, à ce stade des informations disponibles à l’AMO, <strong>fonctionnellement rattaché au parking maintenu au Niveau 0</strong> ; son statut au regard du périmètre attribué à CQFD reste à confirmer.</p>' },
+                    { html: '<span class="comment-kicker">JURIDIQUEMENT</span>Une attribution <strong>doublement limitée</strong> : <strong>dans l’espace, au Niveau 1 et à la toiture-terrasse, tandis que le Niveau 0 reste affecté au stationnement</strong> ; <strong>dans le temps, par une AOT constitutive de droits réels d’une durée de 35 ans</strong>. Cette durée doit être mise en regard <strong>des investissements nécessaires à la transformation de l’ouvrage et de leur amortissement</strong>.' },
+                    { html: '<span class="comment-kicker">CADRE D’URBANISME RÉGLEMENTAIRE</span>Le PLU fixe actuellement une hauteur maximale de <strong>6 m</strong>, pour une toiture-terrasse existante située à <strong>≈ 5,40 m au-dessus du Niveau 0</strong>. Les échanges intervenus à ce jour avec la Ville font état d’une <strong>évolution envisagée de la hauteur réglementaire jusqu’à 10 m</strong>, restant à confirmer et à traduire dans le document d’urbanisme. Cette évolution convergerait avec le programme recherché : transformer la toiture-terrasse en <strong>véritable espace de vie et d’activités</strong>, intégrant selon les besoins volumes clos, couverts et espaces protégés.' },
+                    { html: '<span class="comment-kicker">OPÉRATIONNELLEMENT</span>Le Niveau 0 reste un parking public, mais devient aussi le socle d’accès aux nouvelles activités. <strong>La capacité de stationnement réellement mobilisable par CQFD constitue une donnée majeure de leur faisabilité et de leur attractivité.</strong>' },
+                    { tag: "div", html: '<span class="comment-kicker">INTERFACES TECHNIQUES À TRAITER</span><p>Deux usages vont désormais coexister dans <strong>un même ouvrage conçu à l’origine pour le seul stationnement</strong>, sur deux niveaux et une toiture-terrasse.</p><p><strong>Ces interfaces viennent en complément du renforcement structurel déjà identifié par l’étude du BET structure sur la base du préprogramme.</strong> La transformation impose notamment de :</p><ul><li><strong>neutraliser ou transformer les rampes voitures</strong> reliant le Niveau 0 aux niveaux supérieurs ;</li><li><strong>séparer les environnements</strong> entre le parking maintenu au Niveau 0 et les nouveaux espaces occupés du Niveau 1 et de la toiture-terrasse transformée ;</li><li><strong>rendre autonomes les accès et circulations</strong> des nouvelles activités, tout en assurant leur liaison avec le stationnement du Niveau 0 ;</li><li><strong>organiser l’autonomie des réseaux et de la viabilité</strong> nécessaires aux espaces CQFD ;</li><li><strong>recomposer la gestion des eaux pluviales</strong> en fonction des nouveaux usages.</li></ul>' },
+                    { html: '<span class="comment-kicker">ANCRAGE AU SOL ET AUX ABORDS</span>Même si la transformation porte principalement sur le Niveau 1 et la toiture-terrasse, <strong>le projet ne peut être conçu « hors sol »</strong>. Ses abords doivent participer à sa métamorphose et organiser une relation lisible entre <strong>espace public, entrée et activités des niveaux supérieurs</strong>. La bande foncière d’environ <strong>8 m au pied de la façade sur le littoral</strong> doit être intégrée à la réflexion de conception pour <strong>ancrer l’architecture, mettre en scène l’entrée et accompagner la façade par un traitement paysager à l’échelle de l’ouvrage</strong>.' },
+                    { html: '<span class="comment-kicker">FINALITÉ ARCHITECTURALE</span>La transformation des usages doit s’accompagner d’une <strong>véritable métamorphose architecturale</strong>, capable de faire évoluer la perception actuelle du parking silo vers celle d’une <strong>destination identifiable, attractive et accueillante</strong>. L’architecture n’est pas une finalité en soi : elle doit <strong>servir l’attractivité, le fonctionnement et la réussite des activités</strong> que CQFD souhaite développer sur le site. L’enjeu est de créer <strong>une adresse, une identité et une expérience</strong>, donnant envie de s’arrêter, d’entrer, de découvrir les lieux et d’y revenir.' },
+                    { html: '<span class="comment-kicker force-title">À RETENIR</span><div class="line-force"><span><strong>UN OUVRAGE<br>À TRANSFORMER</strong></span><span><strong>DES CONTRAINTES<br>À MAÎTRISER</strong></span><span><strong>UNE NOUVELLE<br>IDENTITÉ À CRÉER</strong></span><span><strong>UNE DESTINATION<br>À FAIRE VIVRE</strong></span></div>' }
                 ],
                 photo: "plan parking top.jpg"
             },
@@ -794,7 +812,7 @@
                 photo: ""
             },
             {
-                title:    "Foncier",
+                title:    "Foncier périphérique",
                 subtitle: "",                      /* vide = pas de 2e ligne */
                 color:    "#dd2a7b",
                 model:    "ID_MODELE_7",
@@ -991,7 +1009,7 @@
         body.innerHTML = "";
         const paragraphs = (theme.comments && theme.comments.length) ? theme.comments : [CONFIG.commentsPlaceholder];
         paragraphs.forEach(function (item) {
-            const p = make("p");
+            const p = make((item && item.tag) || "p");
             if (item && typeof item === "object" && item.html) {
                 p.innerHTML = item.html;
             } else {
