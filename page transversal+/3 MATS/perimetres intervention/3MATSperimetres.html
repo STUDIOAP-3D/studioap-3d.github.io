@@ -1010,6 +1010,7 @@
         const paragraphs = (theme.comments && theme.comments.length) ? theme.comments : [CONFIG.commentsPlaceholder];
         paragraphs.forEach(function (item) {
             const p = make((item && item.tag) || "p");
+            if (p.tagName === "DIV") p.classList.add("comment-section");
             if (item && typeof item === "object" && item.html) {
                 p.innerHTML = item.html;
             } else {
