@@ -105,25 +105,13 @@
 			<script src="assets/js/main.js"></script>
 
 									<script>
-        const motDePasse = prompt("Mot de passe :");
+        // Afficher directement la page, sans demander de mot de passe.
+        document.getElementById("page-protegee").style.display = "block";
 
-        if (motDePasse === "Transversal+") {
-
-            // Afficher la page
-            document.getElementById("page-protegee").style.display = "block";
-
-            // Charger sf_showhide.js APRÈS le mot de passe
-            const script = document.createElement("script");
-            script.src = "sf_showhide.js";
-
-            document.body.appendChild(script);
-
-        } else {
-
-            // Afficher le message d'erreur
-            document.getElementById("acces-refuse").style.display = "block";
-
-        }
+        // Charger sf_showhide.js au chargement de la page.
+        const script = document.createElement("script");
+        script.src = "sf_showhide.js";
+        document.body.appendChild(script);
     </script>
 
 	</body>
