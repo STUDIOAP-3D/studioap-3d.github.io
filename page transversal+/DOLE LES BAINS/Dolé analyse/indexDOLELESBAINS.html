@@ -24,6 +24,45 @@
             min-height: 100vh;
             padding-top: 100px;
         }
+
+        /* Case à cocher pour la visibilité des calques */
+        .layer-checkbox {
+            float: right;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #0d6efd;
+            margin-top: 6px;
+            margin-right: 6px;
+        }
+
+        /* Icône info pour les calques (Arbres remarquables, etc.) */
+        .layer-info-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            color: #0d6efd;
+            text-decoration: none;
+            cursor: pointer;
+            vertical-align: middle;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .layer-info-link:hover {
+            color: #0a58ca;
+            transform: scale(1.25);
+        }
+
+        .layer-info-link svg {
+            display: block;
+        }
+
+        span.caret,
+        span.caret_child {
+            display: inline-flex;
+            align-items: center;
+        }
     </style>
 </head>
 
@@ -79,6 +118,9 @@
     <script>
         // Afficher directement la page, sans demander de mot de passe.
         document.getElementById("page-protegee").style.display = "block";
+
+        // Lien vers la page HTML de votre choix pour l'icône "info" des arbres remarquables :
+        window.LIEN_ARBRES_REMARQUABLES = "page_arbres_remarquables.html";
 
         // Charger sf_showhide.js au chargement de la page.
         const script = document.createElement("script");

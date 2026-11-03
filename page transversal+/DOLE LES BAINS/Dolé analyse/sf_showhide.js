@@ -1,6 +1,64 @@
+// =============================================================================
+// CONFIGURATION DU LIEN "INFO" (Arbres remarquables)
+// =============================================================================
+// Lien vers la page HTML de votre choix pour l'icône "info" :
+var LIEN_ARBRES_REMARQUABLES = window.LIEN_ARBRES_REMARQUABLES || "page_arbres_remarquables.html";
+
+// Fonction de détection du calque "arbres remarquables" (insensible à la casse, accents, tirets)
+function isArbresRemarquables(name) {
+  if (!name || typeof name !== "string") return false;
+  var clean = name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[_\-]+/g, " ");
+  return clean.includes("arbre") && clean.includes("remarquable");
+}
+
+// Création de l'icône SVG cliquable menant vers la page HTML
+function createInfoLink(url) {
+  var a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.className = "layer-info-link";
+  a.title = "En savoir plus (ouvrir la page)";
+  a.setAttribute("aria-label", "Informations sur ce calque");
+  a.innerHTML =
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<circle cx="12" cy="12" r="10"></circle>' +
+    '<line x1="12" y1="16" x2="12" y2="12"></line>' +
+    '<line x1="12" y1="8" x2="12.01" y2="8"></line>' +
+    '</svg>';
+
+  // Empêche le clic d'ouvrir/fermer le dossier déroulant si c'est un parent
+  a.addEventListener("click", function (e) {
+    e.stopPropagation();
+  });
+
+  return a;
+}
+
+// Fonction pour s'assurer que les calques parents sont visibles lorsqu'un enfant est coché
+function ensureParentsVisible(checkbox, apiInstance) {
+  var currentApi = apiInstance || sketchfabApi;
+  var current = checkbox.closest("ul.nested");
+  while (current && current.id) {
+    var parentCb = document.getElementById("check_" + current.id);
+    if (parentCb && !parentCb.checked) {
+      parentCb.checked = true;
+      if (currentApi && currentApi.show) {
+        currentApi.show(parentCb.value);
+      }
+    }
+    current = current.parentElement ? current.parentElement.closest("ul.nested") : null;
+  }
+}
+
 // Sketchfab Viewer API: Start/Stop the viewer
 var version = "1.9.0";
 var uid = "7981adb558264af0aad9472923a91eb8";
+var sketchfabApi = null;
 
 var urlParams = new URLSearchParams(window.location.search);
 var autoSpin = 0.0;
@@ -88,49 +146,35 @@ var success = function (api) {
             generateTree();
            } 
 
-          var hideButtons = document.getElementsByClassName("Hide");
-          //console.log('HIDE BUTTONS LENGTH: ' + hideButtons.length);
-          for (let i = 0; i < hideButtons.length; i++) {
-            hideButtons[i].addEventListener("click", function () {
-              //api.hide(this.value);
-              this.style.backgroundColor = "red";
+          sketchfabApi = api;
 
-              var childButtons = document
-                .getElementById(this.value)
-                .getElementsByClassName("Hide");
-              console.log(" Child Buttons: " + childButtons.length);
+          // Gestion des cases à cocher pour afficher / masquer les calques 3D
+          var layerCheckboxes = document.getElementsByClassName("layer-checkbox");
+          for (let i = 0; i < layerCheckboxes.length; i++) {
+            layerCheckboxes[i].addEventListener("change", function () {
+              var isChecked = this.checked;
+              var instanceId = this.value;
 
-              if (childButtons.length == 0) {
-                api.hide(this.value);
+              if (isChecked) {
+                api.show(instanceId);
+                // Si ce sous-calque est dans un groupe parent, on s'assure que le parent est affiché
+                ensureParentsVisible(this, api);
+              } else {
+                api.hide(instanceId);
               }
 
-              for (let j = 0; j < childButtons.length; j++) {
-                hideBTN = document.getElementById(childButtons[j].id);
-                //console.log(childButtons[i].id);
-                hideBTN.style.backgroundColor = "red";
-                api.hide(hideBTN.value);
-              }
-            });
-          }
-
-          var showButtons = document.getElementsByClassName("Show");
-          //console.log('SHOW BUTTONS LENGTH: ' + showButtons.length);
-          for (let k = 0; k < showButtons.length; k++) {
-            showButtons[k].addEventListener("click", function () {
-              api.show(this.value);
-              var hideBTN = document.getElementById(
-                this.id + "_" + this.name + "Hide"
-              );
-              hideBTN.style.backgroundColor = "green";
-
-              var childButtons = document
-                .getElementById(this.value)
-                .getElementsByClassName("Show");
-              //console.log(' Child Buttons: ' + childButtons.length);
-              for (let l = 0; l < childButtons.length; l++) {
-                api.show(childButtons[l].value);
-                hideBTN = document.getElementById(childButtons[l].id + "_Hide");
-                hideBTN.style.backgroundColor = "green";
+              // Gestion des sous-calques éventuels (enfants situés dans l'élément <ul id="instanceId">)
+              var childContainer = document.getElementById(instanceId);
+              if (childContainer) {
+                var childCheckboxes = childContainer.getElementsByClassName("layer-checkbox");
+                for (let j = 0; j < childCheckboxes.length; j++) {
+                  childCheckboxes[j].checked = isChecked;
+                  if (isChecked) {
+                    api.show(childCheckboxes[j].value);
+                  } else {
+                    api.hide(childCheckboxes[j].value);
+                  }
+                }
               }
             });
           }
@@ -233,7 +277,7 @@ function unflatten(arr) {
 **********************/
 function to_ul(branches, setID = "", setClass = "") {
   var outerul = document.createElement("ul");
-  var lengthOfName = 25;
+  var lengthOfName = 45;
 
   if (setID != "") {
     outerul.id = setID;
@@ -246,29 +290,41 @@ function to_ul(branches, setID = "", setClass = "") {
     var branch = branches[i];
     var li = document.createElement("li");
 
-    var text = branch.name.replace(/_/g, " ");
+    var fullName = branch.name.replace(/_/g, " ");
+    var text = fullName;
     if (text.length > lengthOfName) {
-      text = text.substring(0, lengthOfName);
-      text += "...";
+      text = text.substring(0, lengthOfName) + "...";
     }
     var textNode = document.createTextNode(text);
 
     if (branch.isParent) {
       var sp = document.createElement("span");
       sp.className = "caret";
+      sp.title = fullName;
 
       sp.appendChild(textNode);
 
+      // Ajout de l'icône info sur la ligne "arbres remarquables"
+      if (isArbresRemarquables(branch.name)) {
+        sp.appendChild(createInfoLink(LIEN_ARBRES_REMARQUABLES));
+      }
+
       li.appendChild(sp);
-      li.appendChild(createButton("Hide", branch.instanceID, branch.name));
-      li.appendChild(createButton("Show", branch.instanceID, branch.name));
+      li.appendChild(createCheckbox(branch.instanceID, branch.name));
     } else {
       var sp2 = document.createElement("span");
       sp2.className = "caret_child";
+      sp2.title = fullName;
+
       sp2.appendChild(textNode);
+
+      // Ajout de l'icône info sur la ligne "arbres remarquables"
+      if (isArbresRemarquables(branch.name)) {
+        sp2.appendChild(createInfoLink(LIEN_ARBRES_REMARQUABLES));
+      }
+
       li.appendChild(sp2);
-      li.appendChild(createButton("Hide", branch.instanceID, branch.name));
-      li.appendChild(createButton("Show", branch.instanceID, branch.name));
+      li.appendChild(createCheckbox(branch.instanceID, branch.name));
     }
 
     if (branch.children) {
@@ -280,6 +336,17 @@ function to_ul(branches, setID = "", setClass = "") {
 
   console.log(outerul);
   return outerul;
+}
+
+function createCheckbox(instance, name) {
+  var cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.className = "layer-checkbox";
+  cb.id = "check_" + instance;
+  cb.value = instance;
+  cb.checked = true; // Par défaut, tous les calques sont visibles
+  cb.title = "Cocher pour afficher, décocher pour masquer";
+  return cb;
 }
 
 function createButton(btnType, instance, name) {
