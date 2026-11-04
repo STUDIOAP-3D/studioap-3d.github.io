@@ -2,7 +2,7 @@
 // CONFIGURATION DU LIEN "INFO" (Arbres remarquables)
 // =============================================================================
 // Lien vers la page HTML de votre choix pour l'icône "info" :
-var LIEN_ARBRES_REMARQUABLES = window.LIEN_ARBRES_REMARQUABLES || "page_arbres_remarquables.html";
+var LIEN_ARBRES_REMARQUABLES = window.LIEN_ARBRES_REMARQUABLES || "page_arbres_remarquables.pdf";
 
 // Fonction de détection du calque "arbres remarquables" (insensible à la casse, accents, tirets)
 function isArbresRemarquables(name) {
