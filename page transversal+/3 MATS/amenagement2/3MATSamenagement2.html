@@ -4,59 +4,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page protégée</title>
+    <title>Les Trois Mâts – Visualisation 3D</title>
 
-    <link rel="stylesheet" href="style.css">
+    <!-- Nouvelle feuille de style (autonome, remplace style.css pour cette page) -->
+    <link rel="stylesheet" href="style_dole.css">
 
     <!-- API Sketchfab -->
     <script src="https://static.sketchfab.com/api/sketchfab-viewer-1.9.0.js"></script>
+
+    <style>
+        #page-protegee { display: none; }
+    </style>
 </head>
 
 <body>
 
-    <!-- PAGE PROTÉGÉE -->
+    <!-- PAGE -->
     <div id="page-protegee">
 
-        <div class="py-5 min-height-90vh"
-             style="min-height:90vh; background-color:#272425!important;">
-
-            <div class="container">
-
-                <div class="row">
-
-                    <div class="d-flex flex-column col-md-8 mb-3">
-
-                        <iframe
-                            id="api-frame"
-                            width="100%"
-                            height="auto"
-                            allowfullscreen
-                            mozallowfullscreen="true"
-                            webkitallowfullscreen="true"
-                            class="mb-3 rounded shadow-lg embed-responsive embed-responsive-4by3 border border-info"
-                            loading="lazy">
-                        </iframe>
-
-                    </div>
-
-                    <div class="d-flex flex-column col-md-4 mx-auto">
-
-                        <div class="navTree" id="navTree">
-                        </div>
-
-                    </div>
-
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo">3D</div>
+                <div>
+                    <h1>Les Trois Mâts</h1>
+                    <div class="sub">Visualisation 3D interactive · TRANSVERSAL-Plus</div>
                 </div>
+            </div>
+            <div class="pill" id="compteur">Chargement…</div>
+        </header>
 
+        <div class="layout">
+
+            <div class="viewer">
+                <iframe
+                    id="api-frame"
+                    allowfullscreen
+                    mozallowfullscreen="true"
+                    webkitallowfullscreen="true"
+                    loading="lazy">
+                </iframe>
+
+                <!-- Barre de navigation des vues panoramiques (remplace "Select an annotation") -->
+                <div class="vues-bar" id="vues-bar" style="display:none">
+                    <button type="button" id="vues-prev" aria-label="Vue précédente">&#8249;</button>
+                    <span id="vues-label">Sélectionner une vue panoramique</span>
+                    <button type="button" id="vues-next" aria-label="Vue suivante">&#8250;</button>
+                </div>
             </div>
 
-        </div>
+            <aside class="panel">
+                <h2>Calques de la scène</h2>
+                <div class="hint">Afficher / masquer les objets</div>
 
+                <!-- L'arborescence des calques est générée ici par sf_showhide.js -->
+                <div class="navTree" id="navTree"></div>
+
+                <div class="panel-foot">
+                    <button type="button" class="btn" id="btn-tout-afficher">Tout afficher</button>
+                    <button type="button" class="btn" id="btn-tout-masquer">Tout masquer</button>
+                </div>
+            </aside>
+
+        </div>
     </div>
 
 
     <script>
-        // Chargement direct de sf_showhide.js (sans mot de passe)
+        // =====================================================================
+        //  RÉGLAGES DE LA PAGE (à modifier ici, sans toucher à sf_showhide.js)
+        // =====================================================================
+
+        // Lien de l'icône "info" des arbres remarquables
+        window.LIEN_ARBRES_REMARQUABLES = "page_arbres_remarquables.pdf";
+
+        // ---------------------------------------------------------------------
+        // 1) ORDRE DES ONGLETS
+        //    Les calques apparaissent dans l'ordre de cette liste.
+        //    Ceux qui ne sont pas listés viennent après, dans l'ordre du modèle 3D.
+        //    Le nom peut être écrit avec ou sans accents / majuscules / "_".
+        //    Cet ordre s'applique aussi aux sous-calques et aux dossiers (voir 2).
+        // ---------------------------------------------------------------------
+        window.ORDRE_CALQUES = [
+            "ETAT EXISTANT",
+            "PROGRAMME",
+            "ENVIRONNEMENT",   // dernier onglet
+        ];
+
+        // ---------------------------------------------------------------------
+        // 2) DOSSIERS (SOUS-DOSSIERS) DE CALQUES
+        //    Regroupe des calques existants sous un onglet "dossier".
+        //    Exemple (désactivé, retirez les /* */ pour l'essayer) :
+        // ---------------------------------------------------------------------
+        window.GROUPES_CALQUES = [
+        {
+                nom: "ETAT EXISTANT",
+                calques: ["Niveau 0 état actuel", "Niveau 1 état actuel", "Niveau 2 état actuel"]
+            },
+            {
+                nom: "PROGRAMME",
+                calques: ["Programme ( août 2026 _ Niveau 1)", "Programme ( août 2026 _ Niveau 2)"]
+            },
+            {
+                nom: "Environnement",
+                calques: ["Environnement"]
+            }
+        ];
+
+        // ---------------------------------------------------------------------
+        // 3) COULEURS (optionnel)
+        //    Par défaut, chaque onglet principal prend une couleur de la palette.
+        //    Pour imposer une couleur à un onglet, ajoutez une ligne ci-dessous.
+        // ---------------------------------------------------------------------
+        window.COULEURS_CALQUES = {
+            // "CHEMINS ANCIENS": "#f59e0b",
+            // "PROJET": "#38bdf8"
+        };
+
+        // Ouvrir tous les dossiers au chargement ? (true / false)
+        window.DOSSIERS_OUVERTS_PAR_DEFAUT = false;
+
+        // =====================================================================
+
+        // Afficher la page
+        document.getElementById("page-protegee").style.display = "block";
+
+        // Charger sf_showhide.js
         const script = document.createElement("script");
         script.src = "sf_showhide.js";
         document.body.appendChild(script);
