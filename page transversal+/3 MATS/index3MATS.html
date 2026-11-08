@@ -7,21 +7,6 @@
 -->
 <html>
 
-    <style>
-        #page-protegee {
-            display: none;
-        }
-
-        #acces-refuse {
-            display: none;
-            background-color: #272425;
-            color: white;
-            text-align: center;
-            min-height: 100vh;
-            padding-top: 100px;
-        }
-    </style>
-
 	<head>
 		<title>STUDIOAP-3D</title>
 		<meta charset="utf-8" />
@@ -33,12 +18,6 @@
 
 
 	<body class="is-preload">
-
-		    <!-- Message si mauvais mot de passe -->
-    <div id="acces-refuse">
-        <h1>⛔ Accès refusé</h1>
-        <p>Mot de passe incorrect.</p>
-    </div>
 
 		<!-- Wrapper -->
 		 <div id="page-protegee">
@@ -159,25 +138,10 @@
 			<script src="assets/js/main.js"></script>
 
 									<script>
-        const motDePasse = prompt("Mot de passe :");
-
-        if (motDePasse === "Transversal+") {
-
-            // Afficher la page
-            document.getElementById("page-protegee").style.display = "block";
-
-            // Charger sf_showhide.js APRÈS le mot de passe
-            const script = document.createElement("script");
-            script.src = "sf_showhide.js";
-
-            document.body.appendChild(script);
-
-        } else {
-
-            // Afficher le message d'erreur
-            document.getElementById("acces-refuse").style.display = "block";
-
-        }
+        // Chargement direct de sf_showhide.js (sans mot de passe)
+        const script = document.createElement("script");
+        script.src = "sf_showhide.js";
+        document.body.appendChild(script);
     </script>
 
 	</body>
