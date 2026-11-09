@@ -1,0 +1,234 @@
+/* =============================================================================
+   DOLE LES BAINS – présentation moderne (thème sombre)
+   Fichier autonome : remplace style.css pour cette page.
+   ============================================================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  color: #e8ecf2;
+  background: #0e1116;
+  background-image:
+    radial-gradient(900px 500px at 15% -10%, rgba(34, 197, 94, .12), transparent),
+    radial-gradient(800px 500px at 100% 100%, rgba(56, 189, 248, .10), transparent);
+  background-attachment: fixed;
+}
+
+#page-protegee { height: 100%; flex-direction: column; }
+
+/* ---------- En-tête ---------- */
+.topbar {
+  height: 76px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { display: flex; align-items: center; gap: 16px; }
+.logo {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: linear-gradient(135deg, #22c55e, #38bdf8);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; color: #0e1116;
+}
+.topbar h1 { font-size: 22px; font-weight: 700; letter-spacing: .2px; }
+.topbar .sub { font-size: 13px; color: #8b95a7; margin-top: 2px; }
+.pill {
+  font-size: 12px; padding: 8px 14px; border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .08);
+  color: #b8c2d3;
+}
+
+/* ---------- Zone principale : viewer + panneau ---------- */
+.layout {
+  height: calc(100% - 76px);
+  display: flex;
+  gap: 24px;
+  padding: 0 32px 32px;
+}
+
+.viewer {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .08);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .55);
+  background: #000;
+}
+#api-frame {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: 0;
+}
+
+.panel {
+  width: 400px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .08);
+  backdrop-filter: blur(14px);
+}
+.panel h2 {
+  font-size: 13px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: #8b95a7; font-weight: 600; margin-bottom: 4px;
+}
+.panel .hint { font-size: 13px; color: #6f7a8c; margin-bottom: 16px; }
+
+#navTree {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .2) transparent;
+}
+
+.panel-foot { display: flex; gap: 10px; margin-top: 16px; }
+.btn {
+  flex: 1; height: auto; padding: 12px; border-radius: 12px;
+  font: inherit; font-size: 13px; font-weight: 500;
+  text-transform: none; text-shadow: none;
+  color: #cdd6e4;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .1);
+  cursor: pointer; transition: background .2s;
+}
+.btn:hover { background: rgba(255, 255, 255, .12); }
+
+/* =============================================================================
+   ARBORESCENCE DES CALQUES
+   Chaque thème (niveau 1) reçoit une couleur --c, héritée par ses sous-calques.
+   La couleur est posée par sf_showhide.js (palette ou COULEURS_CALQUES).
+   ============================================================================= */
+#navTree ul { list-style: none; }
+
+#myUL {
+  display: flex;
+  flex-direction: column;   /* permet aussi de réordonner avec la propriété CSS "order" */
+  gap: 10px;
+}
+
+/* --- Thème (niveau 1) : une carte colorée --- */
+#myUL > li {
+  --c: #22c55e;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  background: color-mix(in srgb, var(--c) 11%, rgba(255, 255, 255, .03));
+  border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+  border-left: 5px solid var(--c);
+}
+
+/* Ligne titre + case */
+#navTree span.caret,
+#navTree span.caret_child {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+span.caret { cursor: pointer; user-select: none; }
+
+/* Flèche des dossiers */
+span.caret::before {
+  content: "";
+  width: 7px; height: 7px;
+  margin-right: 12px;
+  border-right: 2px solid var(--c);
+  border-bottom: 2px solid var(--c);
+  transform: rotate(-45deg);
+  transition: transform .2s;
+  flex-shrink: 0;
+}
+span.caret.caret-down::before { transform: rotate(45deg); }
+
+/* --- Sous-calques (niveau 2 et suivants) --- */
+ul.nested { display: none; }
+ul.nested.active { display: block; }
+
+#myUL li > ul.nested {
+  flex-basis: 100%;
+  margin-top: 12px;
+  margin-left: 4px;
+  padding-left: 14px;
+  border-left: 2px solid color-mix(in srgb, var(--c) 55%, transparent);
+}
+#myUL li li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 10px 4px 10px 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #d5dbe6;
+  border-top: 1px solid rgba(255, 255, 255, .06);
+}
+#myUL li li:first-child { border-top: 0; }
+#myUL li li li { font-size: 12.5px; }
+
+/* --- Case à cocher (même système : <input type="checkbox">) --- */
+.layer-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  margin-left: 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 2px solid var(--c);
+  background: transparent center / 14px 14px no-repeat;
+  transition: background-color .15s, transform .15s;
+}
+.layer-checkbox:hover { transform: scale(1.1); }
+.layer-checkbox:checked {
+  background-color: var(--c);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e1116' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E");
+}
+.layer-checkbox:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* --- Icône info --- */
+.layer-info-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-left: 10px;
+  color: var(--c);
+  text-decoration: none;
+  transition: transform .2s ease, opacity .2s ease;
+}
+.layer-info-link:hover { transform: scale(1.2); opacity: .85; }
+.layer-info-link svg { display: block; }
+
+/* =============================================================================
+   ORDRE DES ONGLETS PAR LE CSS (option, voir la notice)
+   Chaque onglet porte une classe "calque-<nom-simplifié>". Exemple :
+   #myUL > li.calque-chemins-anciens { order: 1; }
+   #myUL > li.calque-terrain-capes-existant { order: 2; }
+   (les onglets sans "order" gardent la valeur 0 et passent donc en premier)
+   ============================================================================= */
+
+/* ---------- Adaptation tablette / mobile ---------- */
+@media (max-width: 1000px) {
+  html, body { height: auto; }
+  #page-protegee { height: auto; }
+  .layout { flex-direction: column; height: auto; padding: 0 16px 24px; }
+  .viewer { height: 62vh; flex: none; }
+  .panel { width: 100%; }
+  #navTree { max-height: none; overflow: visible; }
+  .topbar { padding: 0 16px; }
+}

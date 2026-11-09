@@ -1,21 +1,72 @@
 // =============================================================================
-// CONFIGURATION DU LIEN "INFO" (Arbres remarquables)
+//  DOLE LES BAINS – viewer Sketchfab + arborescence de calques (afficher/masquer)
+//  Les réglages (ordre, dossiers, couleurs, lien info) sont dans le fichier HTML.
 // =============================================================================
-// Lien vers la page HTML de votre choix pour l'icône "info" :
-var LIEN_ARBRES_REMARQUABLES = window.LIEN_ARBRES_REMARQUABLES || "page_arbres_remarquables.pdf";
 
-// Fonction de détection du calque "arbres remarquables" (insensible à la casse, accents, tirets)
-function isArbresRemarquables(name) {
-  if (!name || typeof name !== "string") return false;
-  var clean = name
+// ----------------------------- RÉGLAGES (lus dans le HTML) -------------------
+var LIEN_ARBRES_REMARQUABLES = window.LIEN_ARBRES_REMARQUABLES || "page_arbres_remarquables.pdf";
+var ORDRE_CALQUES = window.ORDRE_CALQUES || [];
+var GROUPES_CALQUES = window.GROUPES_CALQUES || [];
+var COULEURS_CALQUES = window.COULEURS_CALQUES || {};
+var DOSSIERS_OUVERTS = window.DOSSIERS_OUVERTS_PAR_DEFAUT === true;
+
+// Palette des onglets principaux (utilisée dans l'ordre, puis on recommence)
+var PALETTE = [
+  "#22c55e", // vert
+  "#38bdf8", // bleu ciel
+  "#f59e0b", // orange
+  "#a78bfa", // violet
+  "#f472b6", // rose
+  "#2dd4bf", // turquoise
+  "#facc15", // jaune
+  "#fb7185", // corail
+  "#60a5fa"  // bleu
+];
+
+// ----------------------------- OUTILS ----------------------------------------
+// Simplifie un nom : minuscules, sans accents, "_" et "-" remplacés par des espaces
+function norm(name) {
+  return String(name || "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[_\-]+/g, " ");
+    .replace(/[_\-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Nom utilisable comme classe CSS : "CHEMINS ANCIENS" -> "chemins-anciens"
+function slug(name) {
+  return norm(name).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+// Couleur imposée dans COULEURS_CALQUES (sinon couleur de la palette)
+var couleursNorm = {};
+Object.keys(COULEURS_CALQUES).forEach(function (k) {
+  couleursNorm[norm(k)] = COULEURS_CALQUES[k];
+});
+function couleurPour(name, index) {
+  return couleursNorm[norm(name)] || PALETTE[index % PALETTE.length];
+}
+
+function isArbresRemarquables(name) {
+  var clean = norm(name);
   return clean.includes("arbre") && clean.includes("remarquable");
 }
 
-// Création de l'icône SVG cliquable menant vers la page HTML
+// Les "dossiers" créés dans le HTML n'existent pas dans le modèle 3D
+function isVirtualId(id) {
+  return typeof id === "string" && id.indexOf("dossier_") === 0;
+}
+
+// Affiche / masque un objet 3D (ignore les dossiers virtuels)
+function setVisible(api, id, visible) {
+  if (!api || isVirtualId(id)) return;
+  if (visible) api.show(id);
+  else api.hide(id);
+}
+
+// Icône "info" cliquable
 function createInfoLink(url) {
   var a = document.createElement("a");
   a.href = url;
@@ -30,16 +81,13 @@ function createInfoLink(url) {
     '<line x1="12" y1="16" x2="12" y2="12"></line>' +
     '<line x1="12" y1="8" x2="12.01" y2="8"></line>' +
     '</svg>';
-
-  // Empêche le clic d'ouvrir/fermer le dossier déroulant si c'est un parent
   a.addEventListener("click", function (e) {
     e.stopPropagation();
   });
-
   return a;
 }
 
-// Fonction pour s'assurer que les calques parents sont visibles lorsqu'un enfant est coché
+// Quand on coche un sous-calque, on réaffiche ses dossiers parents
 function ensureParentsVisible(checkbox, apiInstance) {
   var currentApi = apiInstance || sketchfabApi;
   var current = checkbox.closest("ul.nested");
@@ -47,224 +95,152 @@ function ensureParentsVisible(checkbox, apiInstance) {
     var parentCb = document.getElementById("check_" + current.id);
     if (parentCb && !parentCb.checked) {
       parentCb.checked = true;
-      if (currentApi && currentApi.show) {
-        currentApi.show(parentCb.value);
-      }
+      setVisible(currentApi, parentCb.value, true);
     }
     current = current.parentElement ? current.parentElement.closest("ul.nested") : null;
   }
 }
 
-// Sketchfab Viewer API: Start/Stop the viewer
+// ----------------------------- SKETCHFAB -------------------------------------
 var version = "1.9.0";
 var uid = "7981adb558264af0aad9472923a91eb8";
 var sketchfabApi = null;
 
 var urlParams = new URLSearchParams(window.location.search);
 var autoSpin = 0.0;
-
-if (urlParams.has("autospin")) {
-  autoSpin = urlParams.get("autospin");
-}
-
-if (urlParams.has("id")) {
-  uid = urlParams.get("id");
-}
+if (urlParams.has("autospin")) autoSpin = urlParams.get("autospin");
+if (urlParams.has("id")) uid = urlParams.get("id");
 
 var iframe = document.getElementById("api-frame");
 var client = new window.Sketchfab(version, iframe);
-var treeText = "";
 
 var error = function () {
   console.error("Sketchfab API error");
 };
 
-//var myNodesByNameFromGraph = {};
 var idxNodes = 0;
 var myNodesByNameFromMap = {};
 var officialNodes = [];
-
-var objectID = -1;
-
-/*
-var computeAssociativeArray = function(node){
-		if (!node)  return;
-    var name = node.name;
-    if (!name) name = "noname_" + idxNodes++;       
-                debugger;         		
-    myNodesByNameFromGraph[name] = node;
-    if (!node.children || !node.children.length) return;
-  	for (var i = 0; i < node.children.length; i++){
-  		computeAssociativeArray(node.children[i]);    
-  	}
-}
-*/
+var rootNodeTree;
 
 var success = function (api) {
   api.start(function () {
     api.addEventListener("viewerready", function () {
-      /*
-          api.getSceneGraph(function (err, result) {
-                if (err) {
-                    console.log('-------Scene Graph--------------')
-                    console.log('Error getting nodes');
-                    return;
-                }
-                // get the id from that log
-                //console.log(result);
-              computeAssociativeArray(result);
-                console.log("nodes indexed by names from scene node graph");
-                console.log(myNodesByNameFromGraph);
-            });
-            */
-
       api.getNodeMap(function (err, nodes) {
-        if (!err) {
-          for (var instanceID in nodes) {
-            var node = nodes[instanceID];
-            var name = node.name;
-            if (!name) name = "noname_" + idxNodes++;
-            myNodesByNameFromMap[name] = node;
-          }
-          //console.log("nodes indexed by names from flattened array");
-          //console.log(myNodesByNameFromMap);
+        if (err) return;
 
-          //attempt to look for a 'RootNode' - this seems to be present for FBX uploaded models
-          rootNodeTree = myNodesByNameFromMap["RootNode"];
-
-          if(rootNodeTree === undefined){
-            //attempt to look for a 'root' - this seems to be present for OBJ or single object models
-            rootNodeTree = myNodesByNameFromMap["root"];
-          }
-
-          if(rootNodeTree != undefined){
-
-            recurse(rootNodeTree, rootNodeTree.children.length, 0);
-            //console.log(officialNodes);
-
-            //Now we can build the tree for the UI
-            generateTree();
-           } 
-
-          sketchfabApi = api;
-
-          // Gestion des cases à cocher pour afficher / masquer les calques 3D
-          var layerCheckboxes = document.getElementsByClassName("layer-checkbox");
-          for (let i = 0; i < layerCheckboxes.length; i++) {
-            layerCheckboxes[i].addEventListener("change", function () {
-              var isChecked = this.checked;
-              var instanceId = this.value;
-
-              if (isChecked) {
-                api.show(instanceId);
-                // Si ce sous-calque est dans un groupe parent, on s'assure que le parent est affiché
-                ensureParentsVisible(this, api);
-              } else {
-                api.hide(instanceId);
-              }
-
-              // Gestion des sous-calques éventuels (enfants situés dans l'élément <ul id="instanceId">)
-              var childContainer = document.getElementById(instanceId);
-              if (childContainer) {
-                var childCheckboxes = childContainer.getElementsByClassName("layer-checkbox");
-                for (let j = 0; j < childCheckboxes.length; j++) {
-                  childCheckboxes[j].checked = isChecked;
-                  if (isChecked) {
-                    api.show(childCheckboxes[j].value);
-                  } else {
-                    api.hide(childCheckboxes[j].value);
-                  }
-                }
-              }
-            });
-          }
+        for (var instanceID in nodes) {
+          var node = nodes[instanceID];
+          var name = node.name;
+          if (!name) name = "noname_" + idxNodes++;
+          myNodesByNameFromMap[name] = node;
         }
-      });
-      /*  
-        document.getElementById('screenshot').addEventListener('click', function () {
-           api.getScreenShot(800, 800, 'image/png', function (err, result) {
-           if (!err) {
-             var anchor = document.createElement('a');
-             anchor.href = result;
-             anchor.download = 'screenshot.png';
-             anchor.innerHTML = '<img width="100" height="100" src=' + result + '>';
-             document.getElementById('navTree').appendChild(anchor);
+
+        // 'RootNode' (FBX) ou 'root' (OBJ / modèle simple)
+        rootNodeTree = myNodesByNameFromMap["RootNode"];
+        if (rootNodeTree === undefined) rootNodeTree = myNodesByNameFromMap["root"];
+
+        if (rootNodeTree != undefined) {
+          recurse(rootNodeTree, rootNodeTree.children.length, 0);
+          generateTree();
+        }
+
+        sketchfabApi = api;
+
+        // Cases à cocher : afficher / masquer les calques 3D
+        var layerCheckboxes = document.getElementsByClassName("layer-checkbox");
+        for (let i = 0; i < layerCheckboxes.length; i++) {
+          layerCheckboxes[i].addEventListener("change", function () {
+            var isChecked = this.checked;
+            var instanceId = this.value;
+
+            setVisible(api, instanceId, isChecked);
+            if (isChecked) ensureParentsVisible(this, api);
+
+            // Sous-calques : ils suivent l'état de leur dossier
+            var childContainer = document.getElementById(instanceId);
+            if (childContainer) {
+              var childCheckboxes = childContainer.getElementsByClassName("layer-checkbox");
+              for (let j = 0; j < childCheckboxes.length; j++) {
+                childCheckboxes[j].checked = isChecked;
+                setVisible(api, childCheckboxes[j].value, isChecked);
+              }
             }
           });
-        });
-        */
-
-      /*
-            document.getElementById('show').addEventListener('click', function () {
-                api.show(id);
-            });
-            
-            */
+        }
+      });
     });
   });
 };
+
 client.init(uid, {
   success: success,
   error: error,
   autostart: 1,
   preload: 1,
   autospin: autoSpin,
-  transparent: 1
+  transparent: 1,
+  ui_infos: 0 // titre/auteur déjà affichés dans l'en-tête de la page (mettre 1 pour les rétablir)
 });
-//////////////////////////////////
-// GUI Code
-//////////////////////////////////
-function initGui() {
-  var controls = document.getElementById("navTree");
-  var buttonsText = "";
-  buttonsText += '<button id="screenshot"></button>';
-  controls.innerHTML = buttonsText;
+
+// ----------------------------- BOUTONS TOUT AFFICHER / MASQUER ---------------
+function setAll(visible) {
+  var cbs = document.getElementsByClassName("layer-checkbox");
+  for (var i = 0; i < cbs.length; i++) {
+    if (cbs[i].checked !== visible) {
+      cbs[i].checked = visible;
+      cbs[i].dispatchEvent(new Event("change"));
+    }
+  }
 }
-//initGui();
+var btnOn = document.getElementById("btn-tout-afficher");
+var btnOff = document.getElementById("btn-tout-masquer");
+if (btnOn) btnOn.addEventListener("click", function () { setAll(true); });
+if (btnOff) btnOff.addEventListener("click", function () { setAll(false); });
 
+// ----------------------------- ARBORESCENCE ----------------------------------
 function generateTree() {
-  //console.log("Total Node Count: " + officialNodes.length);
-
   var tree = unflatten(officialNodes);
-  //console.log(tree);
 
-  //Create the HTML UL elemenet of the objects
+  applyCustomGroups(tree); // dossiers définis dans le HTML (GROUPES_CALQUES)
+  sortTree(tree);          // ordre défini dans le HTML (ORDRE_CALQUES)
+
   var navTree = document.getElementById("navTree");
   navTree.appendChild(to_ul(tree, "myUL"));
 
   var toggler = document.getElementsByClassName("caret");
-  var i;
-
-  for (i = 0; i < toggler.length; i++) {
+  for (var i = 0; i < toggler.length; i++) {
     toggler[i].addEventListener("click", function () {
       this.parentElement.querySelector(".nested").classList.toggle("active");
       this.classList.toggle("caret-down");
     });
+    if (DOSSIERS_OUVERTS) {
+      toggler[i].parentElement.querySelector(".nested").classList.add("active");
+      toggler[i].classList.add("caret-down");
+    }
   }
+
+  // Compteur dans l'en-tête
+  var total = 0;
+  var cbs = document.getElementsByClassName("layer-checkbox");
+  for (var k = 0; k < cbs.length; k++) if (!isVirtualId(cbs[k].value)) total++;
+  var compteur = document.getElementById("compteur");
+  if (compteur) compteur.textContent = total + " calques";
 }
 
 function unflatten(arr) {
-  var tree = [],
-    mappedArr = {},
-    arrElem,
-    mappedElem;
-
-  // First map the nodes of the array to an object -> create a hash table.
+  var tree = [], mappedArr = {}, arrElem, mappedElem;
   for (var i = 0, len = arr.length; i < len; i++) {
     arrElem = arr[i];
     mappedArr[arrElem.instanceID] = arrElem;
     mappedArr[arrElem.instanceID].children = [];
   }
-
   for (var id in mappedArr) {
     if (mappedArr.hasOwnProperty(id)) {
       mappedElem = mappedArr[id];
-      // If the element is not at the root level, add it to its parent array of children.
       if (mappedElem.parentID) {
         mappedArr[mappedElem.parentID].children.push(mappedElem);
-      }
-      // If the element is at the root level, add it to first level elements array.
-      else {
+      } else {
         tree.push(mappedElem);
       }
     }
@@ -272,60 +248,92 @@ function unflatten(arr) {
   return tree;
 }
 
+// Crée les dossiers "virtuels" demandés dans GROUPES_CALQUES (niveau principal)
+function applyCustomGroups(tree) {
+  GROUPES_CALQUES.forEach(function (g, gi) {
+    var wanted = (g.calques || []).map(norm);
+    var found = [];
+    tree.forEach(function (n, idx) {
+      if (wanted.indexOf(norm(n.name)) > -1) found.push({ node: n, idx: idx });
+    });
+    if (!found.length) return;
+
+    var insertAt = found[0].idx; // le dossier prend la place du premier calque trouvé
+    var members = found.map(function (f) { return f.node; });
+    members.forEach(function (m) { tree.splice(tree.indexOf(m), 1); });
+
+    // On respecte l'ordre de la liste "calques" du dossier
+    members.sort(function (a, b) {
+      return wanted.indexOf(norm(a.name)) - wanted.indexOf(norm(b.name));
+    });
+
+    tree.splice(insertAt, 0, {
+      name: g.nom || "DOSSIER " + (gi + 1),
+      type: "Folder",
+      instanceID: "dossier_" + gi,
+      isParent: true,
+      parentID: 0,
+      children: members
+    });
+  });
+}
+
+// Trie chaque niveau selon ORDRE_CALQUES (les non listés restent à la suite)
+function sortTree(list) {
+  list.forEach(function (n) {
+    if (n.children && n.children.length) sortTree(n.children);
+  });
+  if (!ORDRE_CALQUES.length) return;
+  var order = ORDRE_CALQUES.map(norm);
+  var decorated = list.map(function (n, i) {
+    var r = order.indexOf(norm(n.name));
+    return { n: n, i: i, r: r < 0 ? 1e6 : r };
+  });
+  decorated.sort(function (a, b) {
+    return a.r !== b.r ? a.r - b.r : a.i - b.i;
+  });
+  decorated.forEach(function (d, i) { list[i] = d.n; });
+}
+
 /**********************
   GENERATE HTML UL TREE
 **********************/
-function to_ul(branches, setID = "", setClass = "") {
+function to_ul(branches, setID, setClass) {
+  setID = setID || "";
+  setClass = setClass || "";
   var outerul = document.createElement("ul");
   var lengthOfName = 45;
+  var isRoot = setID === "myUL";
 
-  if (setID != "") {
-    outerul.id = setID;
-  }
-  if (setClass != "") {
-    outerul.className = setClass;
-  }
+  if (setID != "") outerul.id = setID;
+  if (setClass != "") outerul.className = setClass;
 
   for (var i = 0, n = branches.length; i < n; i++) {
     var branch = branches[i];
     var li = document.createElement("li");
 
-    var fullName = branch.name.replace(/_/g, " ");
+    // Onglet principal : classe de repérage + couleur propre
+    if (isRoot) {
+      li.className = "calque calque-" + slug(branch.name);
+      li.setAttribute("data-name", branch.name);
+      li.style.setProperty("--c", couleurPour(branch.name, i));
+    }
+
+    var fullName = String(branch.name).replace(/_/g, " ");
     var text = fullName;
-    if (text.length > lengthOfName) {
-      text = text.substring(0, lengthOfName) + "...";
+    if (text.length > lengthOfName) text = text.substring(0, lengthOfName) + "...";
+
+    var sp = document.createElement("span");
+    sp.className = branch.isParent ? "caret" : "caret_child";
+    sp.title = fullName;
+    sp.appendChild(document.createTextNode(text));
+
+    if (isArbresRemarquables(branch.name)) {
+      sp.appendChild(createInfoLink(LIEN_ARBRES_REMARQUABLES));
     }
-    var textNode = document.createTextNode(text);
 
-    if (branch.isParent) {
-      var sp = document.createElement("span");
-      sp.className = "caret";
-      sp.title = fullName;
-
-      sp.appendChild(textNode);
-
-      // Ajout de l'icône info sur la ligne "arbres remarquables"
-      if (isArbresRemarquables(branch.name)) {
-        sp.appendChild(createInfoLink(LIEN_ARBRES_REMARQUABLES));
-      }
-
-      li.appendChild(sp);
-      li.appendChild(createCheckbox(branch.instanceID, branch.name));
-    } else {
-      var sp2 = document.createElement("span");
-      sp2.className = "caret_child";
-      sp2.title = fullName;
-
-      sp2.appendChild(textNode);
-
-      // Ajout de l'icône info sur la ligne "arbres remarquables"
-      if (isArbresRemarquables(branch.name)) {
-        sp2.appendChild(createInfoLink(LIEN_ARBRES_REMARQUABLES));
-      }
-
-      li.appendChild(sp2);
-      li.appendChild(createCheckbox(branch.instanceID, branch.name));
-    }
+    li.appendChild(sp);
+    li.appendChild(createCheckbox(branch.instanceID, branch.name));
 
     if (branch.children) {
       li.appendChild(to_ul(branch.children, branch.instanceID, "nested"));
@@ -333,8 +341,6 @@ function to_ul(branches, setID = "", setClass = "") {
 
     outerul.appendChild(li);
   }
-
-  console.log(outerul);
   return outerul;
 }
 
@@ -349,31 +355,8 @@ function createCheckbox(instance, name) {
   return cb;
 }
 
-function createButton(btnType, instance, name) {
-  var btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = btnType;
-
-  if (btnType == "Hide") {
-    btn.id = instance + "_" + name + "_" + btnType;
-    btn.style.backgroundColor = "green";
-  } else {
-    btn.id = instance + "_" + name;
-  }
-  btn.value = instance;
-  var btnText = document.createTextNode(btnType);
-  btn.appendChild(btnText);
-
-  return btn;
-}
-
-//////////////////////////////////
-// GUI Code end
-//////////////////////////////////
-
 function recurse(nodeTree, childCount, theParentID) {
   if (typeof nodeTree != "undefined") {
-    //Process the children of this node tree
     for (var i = 0; i < childCount; i++) {
       var node = {
         name: nodeTree.children[i].name,
@@ -384,55 +367,17 @@ function recurse(nodeTree, childCount, theParentID) {
       };
 
       if (node.type == "MatrixTransform") {
-        //Determine if this node is a parent
         node.isParent = isParent(nodeTree.children[i].children);
-
-        console.log(
-          "   " +
-            node.name +
-            "(Node Type:" +
-            node.type +
-            ")" +
-            "(Instance ID: " +
-            node.instanceID +
-            ")" +
-            "(Is Parent: " +
-            node.isParent +
-            ")" +
-            "(Parent ID: " +
-            node.parentID +
-            ")" +
-            " Child Count :" +
-            nodeTree.children[i].children.length
-        );
-
-        //Add this node to the complete node array list we are constructing
         officialNodes.push(node);
-
-        recurse(
-          nodeTree.children[i],
-          nodeTree.children[i].children.length,
-          nodeTree.children[i].instanceID
-        );
+        recurse(nodeTree.children[i], nodeTree.children[i].children.length, nodeTree.children[i].instanceID);
       }
     }
   }
 }
 
 function isParent(children) {
-  //Look through all the children to see if a "MatrixTransform" type exists...
-
-  var result = false;
-
   for (var i = 0; i < children.length; i++) {
-    if (children[i].type == "MatrixTransform") {
-      result = true;
-      console.log("PARENT NODE DETECTED");
-      break;
-    } else {
-      result = false;
-    }
+    if (children[i].type == "MatrixTransform") return true;
   }
-
-  return result;
+  return false;
 }
