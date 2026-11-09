@@ -4,70 +4,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page</title>
+    <title>Centre thermoludique DLB</title>
 
-    <link rel="stylesheet" href="style.css">
+    <!-- Même feuille de style que les autres pages -->
+    <link rel="stylesheet" href="style_dole.css">
 
     <!-- API Sketchfab -->
     <script src="https://static.sketchfab.com/api/sketchfab-viewer-1.9.0.js"></script>
 
     <style>
-        #page-protegee {
-            display: none;
+        #page-protegee { display: flex; }
+
+        /* Sans panneau de calques : le viewer prend toute la largeur
+           et presque toute la hauteur de la page */
+        .topbar { height: 64px; padding: 0 20px; }
+        .layout { height: calc(100% - 64px); padding: 0 20px 20px; gap: 0; }
+        .viewer { border-radius: 18px; }
+
+        @media (max-width: 1000px) {
+            html, body, #page-protegee { height: 100%; }
+            .layout { height: calc(100% - 64px); padding: 0 10px 10px; }
+            .viewer { height: 100%; flex: 1; }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- PAGE -->
     <div id="page-protegee">
 
-        <div class="py-5 min-height-90vh"
-             style="min-height:90vh; background-color:#272425!important;">
-
-            <div class="container">
-
-                <div class="row">
-
-                    <div class="d-flex flex-column col-md-8 mb-3">
-
-                        <iframe
-                            id="api-frame"
-                            width="100%"
-                            height="auto"
-                            allowfullscreen
-                            mozallowfullscreen="true"
-                            webkitallowfullscreen="true"
-                            class="mb-3 rounded shadow-lg embed-responsive embed-responsive-4by3 border border-info"
-                            loading="lazy">
-                        </iframe>
-
-                    </div>
-
-                    <div class="d-flex flex-column col-md-4 mx-auto">
-
-                        <div class="navTree" id="navTree">
-                        </div>
-
-                    </div>
-
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo">3D</div>
+                <div>
+                    <h1>Centre thermoludique DLB</h1>
+                    <div class="sub">Visualisation 3D interactive · TRANSVERSAL-Plus</div>
                 </div>
-
             </div>
+            <div class="pill" id="compteur">Chargement…</div>
+        </header>
 
+        <div class="layout">
+            <div class="viewer">
+                <iframe
+                    id="api-frame"
+                    allowfullscreen
+                    mozallowfullscreen="true"
+                    webkitallowfullscreen="true"
+                    loading="lazy">
+                </iframe>
+
+                <!-- Barre de navigation des vues panoramiques (apparaît si le modèle a des annotations) -->
+                <div class="vues-bar" id="vues-bar" style="display:none">
+                    <button type="button" id="vues-prev" aria-label="Vue précédente">&#8249;</button>
+                    <span id="vues-label">Sélectionner une vue panoramique</span>
+                    <button type="button" id="vues-next" aria-label="Vue suivante">&#8250;</button>
+                </div>
+            </div>
         </div>
 
     </div>
 
     <script>
-        // Afficher directement la page
-        document.getElementById("page-protegee").style.display = "block";
+        // =====================================================================
+        //  NUMÉRO DU MODÈLE SKETCHFAB (identifiant de l'embed)
+        //  On peut aussi ajouter ?id=XXXX à l'adresse de la page pour l'essayer.
+        // =====================================================================
+        var uid = "7b8972a241144e1aa620e8cd0f45d23d";
 
-        // Charger sf_showhide.js
-        const script = document.createElement("script");
-        script.src = "sf_showhide.js";
-        document.body.appendChild(script);
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("id")) uid = urlParams.get("id");
+        var autoSpin = urlParams.has("autospin") ? urlParams.get("autospin") : 0.0;
+
+        var MOJIBAKE = /(?:[\u00ef\u00cf]\u00bf\u00bd|\ufffd|[\u00c2\u00c3][\u0080-\u00bf])+/g;
+
+        var iframe = document.getElementById("api-frame");
+        var compteur = document.getElementById("compteur");
+        var client = new window.Sketchfab("1.9.0", iframe);
+
+        client.init(uid, {
+            success: function (api) {
+                api.start(function () {
+                    api.addEventListener("viewerready", function () {
+                        compteur.textContent = "Modèle prêt";
+                        initBarreVues(api);
+                    });
+                });
+            },
+            error: function () {
+                compteur.textContent = "Erreur de chargement";
+            },
+            autostart: 1,
+            preload: 1,
+            autospin: autoSpin,
+            transparent: 1,
+            ui_annotations: 0, // barre d'annotations Sketchfab remplacée par #vues-bar
+            ui_infos: 0        // titre/auteur déjà dans l'en-tête (mettre 1 pour les rétablir)
+        });
+
+        // ------------------------- BARRE DES VUES PANORAMIQUES -------------------
+        function initBarreVues(api) {
+            var bar = document.getElementById("vues-bar");
+            var label = document.getElementById("vues-label");
+            var prev = document.getElementById("vues-prev");
+            var next = document.getElementById("vues-next");
+            var TEXTE = label.textContent;
+
+            api.getAnnotationList(function (err, list) {
+                if (err || !list || !list.length) return;
+                var courant = -1;
+                bar.style.display = "flex";
+
+                function aller(i) {
+                    courant = (i + list.length) % list.length;
+                    api.gotoAnnotation(courant);
+                }
+                prev.onclick = function () { aller(courant < 0 ? list.length - 1 : courant - 1); };
+                next.onclick = function () { aller(courant + 1); };
+
+                api.addEventListener("annotationSelect", function (i) {
+                    courant = i;
+                    var nom = (i >= 0 && list[i] && list[i].name) ? list[i].name : "";
+                    label.textContent = nom ? nom.replace(MOJIBAKE, "\u00e9") : TEXTE;
+                });
+            });
+        }
     </script>
 
 </body>
