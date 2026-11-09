@@ -132,7 +132,7 @@ function ensureParentsVisible(checkbox, apiInstance) {
 
 // ----------------------------- SKETCHFAB -------------------------------------
 var version = "1.9.0";
-var uid = window.SKETCHFAB_UID || "5351ee6a130d4811adfcf04f3903e322";
+var uid = window.SKETCHFAB_UID || "7b8972a241144e1aa620e8cd0f45d23d";
 var sketchfabApi = null;
 
 var urlParams = new URLSearchParams(window.location.search);
